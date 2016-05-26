@@ -3,16 +3,34 @@
 <head>
 <meta charset="EUC-KR">
 <title>Insert title here</title>
+<script>
+function plus() {
+	var op1 = document.getElementById("op1");
+	var op2 = document.getElementById("op2");
+	
+	var xhr = new XMLHttpRequest();
+	var url = '/plus?op1=' + op1.value + '&op2=' + op2.value;
+	xhr.open("GET", url, true);
+	xhr.onreadystatechange = function() {
+		console.log("readyState: " + xhr.readyState);
+		if (xhr.readyState === 4) {
+			console.log("responseText: " + xhr.responseText);
+			var result = document.getElementById("result");
+			var response = JSON.parse(xhr.responseText);
+			result.value = response.result;
+		}
+	}
+	xhr.send();
+}
+</script>
 </head>
 <body>
 <h1>Calculator Example</h1>
 
-<form method="get" action="/plus">
-<input type="text" name="op1" />
+<input type="text" id="op1" />
 +
-<input type="text" name="op2" />
-<input type="submit" value="=" />
-<input type="text" name="result" />
-</form>
+<input type="text" id="op2" />
+<input type="submit" value="=" onclick="plus()" />
+<input type="text" id="result" />
 </body>
 </html>
