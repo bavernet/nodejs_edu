@@ -4,4 +4,5 @@
 .jshintrc
 .sublime-project
 .tern-project
+node_modules
 */README.md
