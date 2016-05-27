@@ -7,27 +7,26 @@
 <script type="text/javascript" src="/socket.io/socket.io.js"></script>
 <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
 <script type="text/javascript">
-var ctx = null;
-var ws = null;
 
-function draw(px, py, x, y) {
-	ctx.beginPath();
-	ctx.moveTo(px, py);
-	ctx.lineTo(x, y);
-	ctx.closePath();
-	ctx.stroke();
-}
-
-function send(px, py, x, y) {
-	ws.emit("draw", { px : px, py : py, x : x, y : y });
-}
-
-window.onload = function() {
-	var canvas = document.getElementById("canvas");
-	ctx = canvas.getContext("2d");
-	
+$(function() {
+	var ctx = $("#canvas").get(0).getContext("2d");;
+	var ws = null;
 	var isDown = false;
-	canvas.onmousedown = function(event) {
+	var px, py;
+	
+	function draw(px, py, x, y) {
+		ctx.beginPath();
+		ctx.moveTo(px, py);
+		ctx.lineTo(x, y);
+		ctx.closePath();
+		ctx.stroke();
+	}
+
+	function send(px, py, x, y) {
+		ws.emit("draw", { px : px, py : py, x : x, y : y });
+	}
+	
+	$("#canvas").mousedown(function(event) {
 		if (!ws) {
 			window.alert("You should connect to the server!");
 			return;
@@ -35,28 +34,23 @@ window.onload = function() {
 		isDown = true;
 		px = event.pageX - event.target.offsetLeft;
 		py = event.pageY - event.target.offsetTop;
-	};
+	});
 	
-	canvas.onmouseup = function(event) {
+	$("#canvas").mouseup(function(event) {
 		isDown = false;
-	};
+	});
 
-	var px, py;
-	canvas.onmousemove = function(event) {
+	$("#canvas").mousemove(function(event) {
 		if (isDown) {
 			var x = event.pageX - event.target.offsetLeft;
 			var y = event.pageY - event.target.offsetTop;
 			console.log(x + ", " + y);
-			draw(px, py, x, y);
 			send(px, py, x, y);
 			px = x;
 			py = y;
 		}
-	};
-};
-
-$(function() {
-	var id = null;
+	});
+	
 	$('#btnConnect').click(function() {
 		ws = io.connect();
 		ws.on("connect", function() {
@@ -66,10 +60,12 @@ $(function() {
 			});
 		})
 	});
+	
 	$('#btnDisconnect').click(function() {
 		$('#txtStatus').val("disconnected");
 		ws.close();
 		ws = null;
+		isDown = false;
 	});
 });
 </script>
