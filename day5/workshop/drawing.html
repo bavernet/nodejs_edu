@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="EUC-KR">
+<title>Insert title here</title>
+
+<script type="text/javascript" src="/socket.io/socket.io.js"></script>
+<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
+<script type="text/javascript">
+var ctx = null;
+var ws = null;
+
+function draw(px, py, x, y) {
+	ctx.beginPath();
+	ctx.moveTo(px, py);
+	ctx.lineTo(x, y);
+	ctx.closePath();
+	ctx.stroke();
+}
+
+function send(px, py, x, y) {
+	ws.emit("draw", { px : px, py : py, x : x, y : y });
+}
+
+window.onload = function() {
+	var canvas = document.getElementById("canvas");
+	ctx = canvas.getContext("2d");
+	
+	var isDown = false;
+	canvas.onmousedown = function(event) {
+		if (!ws) {
+			window.alert("You should connect to the server!");
+			return;
+		}
+		isDown = true;
+		px = event.pageX - event.target.offsetLeft;
+		py = event.pageY - event.target.offsetTop;
+	};
+	
+	canvas.onmouseup = function(event) {
+		isDown = false;
+	};
+
+	var px, py;
+	canvas.onmousemove = function(event) {
+		if (isDown) {
+			var x = event.pageX - event.target.offsetLeft;
+			var y = event.pageY - event.target.offsetTop;
+			console.log(x + ", " + y);
+			draw(px, py, x, y);
+			send(px, py, x, y);
+			px = x;
+			py = y;
+		}
+	};
+};
+
+$(function() {
+	var id = null;
+	$('#btnConnect').click(function() {
+		ws = io.connect();
+		ws.on("connect", function() {
+			$('#txtStatus').val("connected");
+			ws.on("draw", function(data) {
+				draw(data.px, data.py, data.x, data.y);
+			});
+		})
+	});
+	$('#btnDisconnect').click(function() {
+		$('#txtStatus').val("disconnected");
+		ws.close();
+		ws = null;
+	});
+});
+</script>
+</head>
+<body>
+<p>
+	Status: <input id="txtStatus" value="disconnected" readonly style="border: 0px solid white" />
+	<button id="btnConnect">Connect</button>
+	<button id="btnDisconnect">Disconnect</button>
+</p>
+<canvas id="canvas" width="500" height="500" style="border: 1px solid black"></canvas>
+
+</body>
+</html>
