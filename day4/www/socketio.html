@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="EUC-KR">
+<title>Insert title here</title>
+<script type="text/javascript" src="/socket.io/socket.io.js"></script>
+<script type="text/javascript">
+window.onload = function() {
+	var msg = document.getElementById("msg");
+	var socket = io.connect();
+	socket.on("anna", function(data) {
+		console.log(data);
+		msg.textContent = data.msg;
+		socket.emit("elsa", { answer: "go away anna." });
+	});
+}
+</script>
+</head>
+<body>
+<p id="msg" />
+
+</body>
+</html>
